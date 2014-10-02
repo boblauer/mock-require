@@ -1,16 +1,15 @@
 #mock-require
-.
+
 ####Simple, intuitive mocking of Node.js modules.
 
 [![Build Status](https://travis-ci.org/boblauer/mock-require.svg)](https://travis-ci.org/boblauer/mock-require)
 
 ##About
-.
 
 mock-require is useful if you want to mock `require` statements in Node.js.  I wrote it because I wanted something with a straight-forward API that would let me mock anything, from a single exported function to a standard library.
 
 ##Usage
-.
+
 ```javascript
 var mock = require('mock-require');
 
