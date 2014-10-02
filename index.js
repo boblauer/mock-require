@@ -38,7 +38,5 @@ function stopMocking(path) {
   stopIntercepting[path] = true;
 }
 
-module.exports = {
-  mock: startMocking,
-  revert: stopMocking
-};
+startMocking.stop = stopMocking;
+module.exports = startMocking;
