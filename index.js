@@ -1,6 +1,7 @@
 var Module           = require('module')
   , dirname          = require('path').dirname
   , join             = require('path').join
+  , callerId         = require('caller-id')
   , originalLoader   = Module._load
   , intercept        = {}
   ;
@@ -16,18 +17,21 @@ Module._load = function(request, parent) {
 };
 
 function startMocking(path, mockExport) {
+  var calledFrom = callerId.getData().filePath;
+
   if (typeof mockExport === 'string') {
-    mockExport = require(getFullPath(mockExport));
+    mockExport = require(getFullPath(mockExport, calledFrom));
   }
 
-  intercept[getFullPath(path)] = mockExport;
+  intercept[getFullPath(path, calledFrom)] = mockExport;
 }
 
 function stopMocking(path) {
-  delete intercept[getFullPath(path)];
+  var calledFrom = callerId.getData().filePath;
+  delete intercept[getFullPath(path, calledFrom)];
 }
 
-function getFullPath(path) {
+function getFullPath(path, calledFrom) {
   var needsFullPath = true
     , resolvedPath
     , isExternal
@@ -45,28 +49,11 @@ function getFullPath(path) {
   } catch(e) { }
 
   if (needsFullPath) {
-    path = join(dirname(getCallingFile(path)), path);
+    path = join(dirname(calledFrom), path);
     path = Module._resolveFilename(path);
   }
 
   return path;
-}
-
-function getCallingFile() {
-  var origPrepareStackTrace = Error.prepareStackTrace
-    , fileName
-    , stack
-    ;
-
-  Error.prepareStackTrace = function (_, stack) { return stack; };
-  stack = new Error().stack;
-  Error.prepareStackTrace = origPrepareStackTrace;
-
-  while (!fileName && stack.length) {
-    fileName = stack.shift().receiver.filename;
-  }
-
-  return fileName;
 }
 
 module.exports = startMocking;

@@ -54,10 +54,11 @@ var assert  = require('assert')
 })();
 
 (function shouldMockExternalLibs() {
-  mock('ext', { mocked: true });
+  mock('caller-id', { mocked: true });
 
-  var ext = require('ext');
-  assert.equal(ext.mocked, true);
+  var callerId = require('caller-id');
+  assert.equal(callerId.mocked, true);
+  mock.stop('caller-id');
 })();
 
 (function shouldRequireMockedLib() {

@@ -6,7 +6,9 @@
   "directories": {
     "test": "test"
   },
-  "dependencies": {},
+  "dependencies": {
+    "caller-id": "^0.1.0"
+  },
   "devDependencies": {},
   "scripts": {
     "test": "node test"
