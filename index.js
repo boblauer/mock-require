@@ -28,12 +28,23 @@ function stopMocking(path) {
 }
 
 function getFullPath(path) {
-  var isNative = false;
+  var needsFullPath = true
+    , resolvedPath
+    , isExternal
+    ;
+
   try {
-    isNative = Module._resolveFilename(path) === path;
+    resolvedPath = require.resolve(path);
+    isExternal = resolvedPath.indexOf('/node_modules/') !== -1;
+
+    needsFullPath = resolvedPath !== path && !isExternal;
+
+    if (isExternal) {
+      path = resolvedPath;
+    }
   } catch(e) { }
 
-  if (!isNative) {
+  if (needsFullPath) {
     path = join(dirname(getCallingFile(path)), path);
     path = Module._resolveFilename(path);
   }
@@ -58,5 +69,5 @@ function getCallingFile() {
   return fileName;
 }
 
-startMocking.stop = stopMocking;
 module.exports = startMocking;
+module.exports.stop = stopMocking;

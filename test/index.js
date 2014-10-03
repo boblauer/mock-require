@@ -53,6 +53,13 @@ var assert  = require('assert')
   assert.equal(fs.mocked, true);
 })();
 
+(function shouldMockExternalLibs() {
+  mock('ext', { mocked: true });
+
+  var ext = require('ext');
+  assert.equal(ext.mocked, true);
+})();
+
 (function shouldRequireMockedLib() {
   mock('fs', 'path');
 
