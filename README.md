@@ -21,28 +21,23 @@ var http = require('http');
 http.request(); // 'http.request called'
 ```
 ##API
-
 ```javascript
 mock(path, mockExport)
 ```
 
-`path`: `String`
+__path__: `String`
 
 The module you that you want to mock.  This is the same string you would pass in if you wanted to `require` the module.
 
-This path should be relative to the current file, just as it would be if you were `require`ing the module from the current file.  mock-require is smart enough to mock this module everywhere it is required, even if it's required from a different file using a different relative path.
+This path should be relative to the current file, just as it would be if you were to `require` the module from the current file.  mock-require is smart enough to mock this module everywhere it is required, even if it's required from a different file using a different relative path.
 
-`mockExport` : `function`
+__mockExport__ : `object/function`
 
-The function you want to be returned from `require`, instead of the module's exported function.  This is useful if your module only exports a single function.
+The function or object you want to be returned from `require`, instead of the `path` module's exports.
 
-`mockExport` : `object`
+__mockExport__ : `string`
 
-The object you wnat to be returned from `require`, instead of the module's exported object.  This is useful if your module exports a complex object, such as `require('fs')`.
-
-`mockExport` : `string`
-
-The module you want to be returned from `require`, instead of the module's export.  This allows you to replace modules with other modules.  For example, if you wanted to replace the `fs` module with the `path` module (you probably wouldn't, but it's just an example):
+The module you want to be returned from `require`, instead of the `path` module's export.  This allows you to replace modules with other modules.  For example, if you wanted to replace the `fs` module with the `path` module (you probably wouldn't, but if you did):
 
 ```javascript
 require('fs', 'path');
@@ -70,16 +65,15 @@ var mock = require('mock-require');
 mock('../some/other/dependency', './spy');
 ...
 ```
-
+---
 ```javascript
 mock.stop(path)
 ```
+__path__: `String`
 
-`path`: `String`
+The module you that you want to stop mocking.  This is the same string you would pass in if you wanted to `require` the module.
 
-The module you that you want to stop mock.  This is the same string you would pass in if you wanted to `require` the module.
-
-This will not modify any modules that have already been required, it will only modify modules required after `mock.stop` is called.  For example:
+This will only modify variables used after `mock.stop` is called.  For example:
 
 ```javascript
 var mock = require('mock-require');
