@@ -23,7 +23,7 @@ http.request(); // 'http.request called'
 ##API
 
 ```javascript
-mock(path, mockedLib)
+mock(path, mockExport)
 ```
 
 `path`: `String`
@@ -32,15 +32,15 @@ The module you that you want to mock.  This is the same string you would pass in
 
 This path should be relative to the current file, just as it would be if you were `require`ing the module from the current file.  mock-require is smart enough to mock this module everywhere it is required, even if it's required from a different file using a different relative path.
 
-`mockedLib` : `function`
+`mockExport` : `function`
 
 The function you want to be returned from `require`, instead of the module's exported function.  This is useful if your module only exports a single function.
 
-`mockedLib` : `object`
+`mockExport` : `object`
 
 The object you wnat to be returned from `require`, instead of the module's exported object.  This is useful if your module exports a complex object, such as `require('fs')`.
 
-`mockedLib` : `string`
+`mockExport` : `string`
 
 The module you want to be returned from `require`, instead of the module's export.  This allows you to replace modules with other modules.  For example, if you wanted to replace the `fs` module with the `path` module (you probably wouldn't, but it's just an example):
 
