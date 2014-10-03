@@ -1,41 +1,61 @@
 var Module           = require('module')
+  , dirname          = require('path').dirname
+  , join             = require('path').join
   , originalLoader   = Module._load
   , intercept        = {}
-  , stopIntercepting = {}
   ;
 
 Module._load = function(request, parent) {
   var fullFilePath = Module._resolveFilename(request, parent);
 
-  if (stopIntercepting[request] || stopIntercepting[fullFilePath]) {
-    delete intercept[request];
-    delete intercept[fullFilePath];
-    delete stopIntercepting[request];
-    delete stopIntercepting[fullFilePath];
-  }
-
-  if (!intercept.hasOwnProperty(fullFilePath) && !intercept.hasOwnProperty(request)) {
+  if (!intercept.hasOwnProperty(fullFilePath)) {
     return originalLoader.apply(this, arguments);
-  }
-
-  if (intercept.hasOwnProperty(request) && !intercept.hasOwnProperty(fullFilePath)) {
-    intercept[fullFilePath] = intercept[request];
-    delete intercept[request];
   }
 
   return intercept[fullFilePath];
 };
 
-function startMocking(path, mock) {
-  if (typeof mock === 'string') {
-    mock = require(mock);
+function startMocking(path, mockExport) {
+  if (typeof mockExport === 'string') {
+    mockExport = require(getFullPath(mockExport));
   }
 
-  intercept[path] = mock;
+  intercept[getFullPath(path)] = mockExport;
 }
 
 function stopMocking(path) {
-  stopIntercepting[path] = true;
+  delete intercept[getFullPath(path)];
+}
+
+function getFullPath(path) {
+  var isNative = false;
+  try {
+    isNative = Module._resolveFilename(path) === path;
+  } catch(e) { }
+
+  if (!isNative) {
+    path = join(dirname(getCallingFile(path)), path);
+    path = Module._resolveFilename(path);
+  }
+
+  return path;
+}
+
+function getCallingFile() {
+  var origPrepareStackTrace = Error.prepareStackTrace
+    , fileName
+    , stack
+    ;
+
+  Error.prepareStackTrace = function (_, stack) { return stack; };
+  stack = new Error().stack;
+  Error.prepareStackTrace = origPrepareStackTrace;
+
+  while (!fileName && stack.length) {
+    fileName = stack.shift().receiver.filename;
+  }
+
+  return fileName;
 }
 
 startMocking.stop = stopMocking;
