@@ -40,7 +40,7 @@ __mockExport__ : `string`
 The module you want to be returned from `require`, instead of the `path` module's export.  This allows you to replace modules with other modules.  For example, if you wanted to replace the `fs` module with the `path` module (you probably wouldn't, but if you did):
 
 ```javascript
-require('fs', 'path');
+mock('fs', 'path');
 require('fs') === require('path'); // true
 ```
 This is useful if you have a mock library that you want to use in multiple places.  For example:
