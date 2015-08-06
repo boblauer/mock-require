@@ -94,4 +94,16 @@ var assert  = require('assert')
   mock.stop('./throw-exception');
 })();
 
+(function shouldUnregisterAllMocks() {
+  mock('fs', {});
+  mock('path', {});
+  var fsMock = require('fs');
+  var pathMock = require('path');
+
+  mock.stopAll();
+
+  assert.notEqual(require('fs'), fsMock);
+  assert.notEqual(require('path'), pathMock);
+})();
+
 console.log('All tests pass!');

@@ -20,10 +20,10 @@ mock('http', { request: function() {
 var http = require('http');
 http.request(); // 'http.request called'
 ```
+
 ##API
-```javascript
-mock(path, mockExport)
-```
+
+###`mock(path, mockExport)`
 
 __path__: `String`
 
@@ -65,10 +65,9 @@ var mock = require('mock-require');
 mock('../some/other/dependency', './spy');
 ...
 ```
----
-```javascript
-mock.stop(path)
-```
+
+###`mock.stop(path)`
+
 __path__: `String`
 
 The module you that you want to stop mocking.  This is the same string you would pass in if you wanted to `require` the module.
@@ -88,5 +87,28 @@ var fs2 = require('fs');
 fs1 === fs2; // false
 ```
 
+###`mock.stopAll()`
+
+This function can be used to remove all registered mocks without the need to remove them individually using `mock.stop()`.
+
+```javascript
+mock('fs', {});
+mock('path', {});
+
+var fs1 = require('fs');
+var path1 = require('path');
+
+mock.stopAll();
+
+var fs2 = require('fs');
+var path2 = require('path');
+
+fs1 === fs2; // false
+path1 === path2; // false
+```
+
 ##Test
+
+```
 npm test
+```

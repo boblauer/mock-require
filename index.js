@@ -31,6 +31,10 @@ function stopMocking(path) {
   delete intercept[getFullPath(path, calledFrom)];
 }
 
+function stopMockingAll() {
+  intercept = {};
+}
+
 function getFullPath(path, calledFrom) {
   var needsFullPath = true
     , resolvedPath
@@ -58,3 +62,4 @@ function getFullPath(path, calledFrom) {
 
 module.exports = startMocking;
 module.exports.stop = stopMocking;
+module.exports.stopAll = stopMockingAll;
