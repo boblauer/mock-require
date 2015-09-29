@@ -43,7 +43,7 @@ function getFullPath(path, calledFrom) {
 
   try {
     resolvedPath = require.resolve(path);
-    isExternal = resolvedPath.indexOf('/node_modules/') !== -1;
+    isExternal = /[/\\]{1}node_modules[/\\]{1}/.test(resolvedPath);
 
     needsFullPath = resolvedPath !== path && !isExternal;
 
