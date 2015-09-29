@@ -39,17 +39,22 @@ function getFullPath(path, calledFrom) {
     resolvedPath = require.resolve(path);
   } catch(e) { }
 
-  var isExternal = /[/\\]{1}node_modules[/\\]{1}/.test(resolvedPath);
+  var isExternal = /[/\\]node_modules[/\\]/.test(resolvedPath);
   var isSystemModule = resolvedPath === path;
   if (isExternal || isSystemModule) {
     return resolvedPath;
   }
 
+  var isLocalModule = /^\.{1,2}[/\\]/.test(path);
+  if (!isLocalModule) {
+    return path;
+  }
+
+  var localModuleName = join(dirname(calledFrom), path);
   try {
-    var localModuleName = join(dirname(calledFrom), path);
     return Module._resolveFilename(localModuleName);
   } catch (e) {
-    if (isModuleNotFoundError(e)) { return path; }
+    if (isModuleNotFoundError(e)) { return localModuleName; }
     else { throw e; }
   }
 }
