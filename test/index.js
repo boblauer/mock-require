@@ -106,4 +106,28 @@ var assert  = require('assert')
   assert.notEqual(require('path'), pathMock);
 })();
 
+(function shouldRegisterMockForModuleThatIsNotFound() {
+  var moduleName = 'module-that-is-not-installed';
+  mock(moduleName, {mocked: true});
+
+  var notInstalled = require(moduleName);
+
+  assert.equal(notInstalled.mocked, true);
+
+  mock.stop(moduleName);
+})();
+
+(function shouldUnRegisterMockForModuleThatIsNotFound() {
+  var moduleName = 'module-that-is-not-installed';
+
+  mock(moduleName, {mocked: true});
+  mock.stop(moduleName);
+
+  try{
+    require(moduleName)
+  } catch (e) {
+    assert.equal(e.code, 'MODULE_NOT_FOUND')
+  }
+})();
+
 console.log('All tests pass!');
