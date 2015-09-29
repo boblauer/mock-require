@@ -183,7 +183,7 @@ var assert  = require('assert')
   assert.equal(b.dependentOn.id, 'local-module-a')
   assert.equal(b.dependentOn.dependentOn.id, 'external-module-a')
 
-  mock.stop(moduleName);
+  mock.stopAll();
 })();
 
 console.log('All tests pass!');
