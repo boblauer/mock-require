@@ -106,4 +106,84 @@ var assert  = require('assert')
   assert.notEqual(require('path'), pathMock);
 })();
 
+(function shouldRegisterMockForExternalModuleThatIsNotFound() {
+  mock('a', {id: 'a'});
+
+  assert.equal(require('a').id, 'a');
+
+  mock.stopAll();
+})();
+
+(function shouldRegisterMultipleMocksForExternalModulesThatAreNotFound() {
+  mock('a', {id: 'a'});
+  mock('b', {id: 'b'});
+  mock('c', {id: 'c'});
+
+  assert.equal(require('a').id, 'a');
+  assert.equal(require('b').id, 'b');
+  assert.equal(require('c').id, 'c');
+
+  mock.stopAll();
+})();
+
+(function shouldRegisterMockForLocalModuleThatIsNotFound() {
+  mock('./a', {id: 'a'});
+
+  assert.equal(require('./a').id, 'a');
+
+  mock.stopAll();
+})();
+
+(function shouldRegisterMockForLocalModuleThatIsNotFound_2() {
+  mock('../a', {id: 'a'});
+
+  assert.equal(require('../a').id, 'a');
+
+  mock.stopAll();
+})();
+
+(function shouldRegisterMockForLocalModuleThatIsNotFoundAtCorrectPath() {
+  mock('./x', {id: 'x'});
+
+  assert.equal(require('./nested/module-c').dependentOn.id, 'x');
+
+  mock.stopAll();
+})();
+
+(function shouldRegisterMultipleMocksForLocalModulesThatAreNotFound() {
+  mock('./a', {id: 'a'});
+  mock('./b', {id: 'b'});
+  mock('./c', {id: 'c'});
+
+  assert.equal(require('./a').id, 'a');
+  assert.equal(require('./b').id, 'b');
+  assert.equal(require('./c').id, 'c');
+
+  mock.stopAll();
+})();
+
+(function shouldUnRegisterMockForModuleThatIsNotFound() {
+  var moduleName = 'module-that-is-not-installed';
+
+  mock(moduleName, {mocked: true});
+  mock.stop(moduleName);
+
+  try{
+    require(moduleName)
+  } catch (e) {
+    assert.equal(e.code, 'MODULE_NOT_FOUND')
+  }
+})();
+
+(function shouldLoadMockedExternalModuleWhenLocalModuleHasSameName() {
+  mock('module-a', {id: 'external-module-a'});
+
+  var b = require('./module-b')
+
+  assert.equal(b.dependentOn.id, 'local-module-a')
+  assert.equal(b.dependentOn.dependentOn.id, 'external-module-a')
+
+  mock.stopAll();
+})();
+
 console.log('All tests pass!');

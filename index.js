@@ -7,13 +7,11 @@ var Module           = require('module')
   ;
 
 Module._load = function(request, parent) {
-  var fullFilePath = Module._resolveFilename(request, parent);
+  var fullFilePath = getFullPath(request, parent.filename);
 
-  if (!intercept.hasOwnProperty(fullFilePath)) {
-    return originalLoader.apply(this, arguments);
-  }
-
-  return intercept[fullFilePath];
+  return intercept.hasOwnProperty(fullFilePath)
+    ? intercept[fullFilePath]
+    : originalLoader.apply(this, arguments);
 };
 
 function startMocking(path, mockExport) {
@@ -36,28 +34,33 @@ function stopMockingAll() {
 }
 
 function getFullPath(path, calledFrom) {
-  var needsFullPath = true
-    , resolvedPath
-    , isExternal
-    ;
-
+  var resolvedPath;
   try {
     resolvedPath = require.resolve(path);
-    isExternal = resolvedPath.indexOf('/node_modules/') !== -1;
-
-    needsFullPath = resolvedPath !== path && !isExternal;
-
-    if (isExternal) {
-      path = resolvedPath;
-    }
   } catch(e) { }
 
-  if (needsFullPath) {
-    path = join(dirname(calledFrom), path);
-    path = Module._resolveFilename(path);
+  var isExternal = /[/\\]node_modules[/\\]/.test(resolvedPath);
+  var isSystemModule = resolvedPath === path;
+  if (isExternal || isSystemModule) {
+    return resolvedPath;
   }
 
-  return path;
+  var isLocalModule = /^\.{1,2}[/\\]/.test(path);
+  if (!isLocalModule) {
+    return path;
+  }
+
+  var localModuleName = join(dirname(calledFrom), path);
+  try {
+    return Module._resolveFilename(localModuleName);
+  } catch (e) {
+    if (isModuleNotFoundError(e)) { return localModuleName; }
+    else { throw e; }
+  }
+}
+
+function isModuleNotFoundError(e){
+  return e.code && e.code === 'MODULE_NOT_FOUND'
 }
 
 module.exports = startMocking;
