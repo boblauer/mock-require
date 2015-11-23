@@ -1,14 +1,14 @@
-#mock-require
+# mock-require
 
-####Simple, intuitive mocking of Node.js modules.
+#### Simple, intuitive mocking of Node.js modules.
 
 [![Build Status](https://travis-ci.org/boblauer/mock-require.svg)](https://travis-ci.org/boblauer/mock-require)
 
-##About
+## About
 
 mock-require is useful if you want to mock `require` statements in Node.js.  I wrote it because I wanted something with a straight-forward API that would let me mock anything, from a single exported function to a standard library.
 
-##Usage
+## Usage
 
 ```javascript
 var mock = require('mock-require');
@@ -21,9 +21,9 @@ var http = require('http');
 http.request(); // 'http.request called'
 ```
 
-##API
+## API
 
-###`mock(path, mockExport)`
+### `mock(path, mockExport)`
 
 __path__: `String`
 
@@ -66,7 +66,7 @@ mock('../some/other/dependency', './spy');
 ...
 ```
 
-###`mock.stop(path)`
+### `mock.stop(path)`
 
 __path__: `String`
 
@@ -87,7 +87,7 @@ var fs2 = require('fs');
 fs1 === fs2; // false
 ```
 
-###`mock.stopAll()`
+### `mock.stopAll()`
 
 This function can be used to remove all registered mocks without the need to remove them individually using `mock.stop()`.
 
@@ -107,7 +107,7 @@ fs1 === fs2; // false
 path1 === path2; // false
 ```
 
-##Test
+## Test
 
 ```
 npm test
