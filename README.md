@@ -107,6 +107,20 @@ fs1 === fs2; // false
 path1 === path2; // false
 ```
 
+### `mock.reRequire`
+
+`reRequire` is useful if you're trying to mock a dependency for a file that has already been required in elsewhere (possibly in another test file). Normally, Node.js will cache this file, so any mocks that you make afterwards will have no effect. `reRequire` clears the cache and allows your mock to apply.
+
+```javascript
+var fs = require('fs');
+var fileToTest = require('./fileToTest');
+mock('fs', {}); // fileToTest is still using the unmocked fs module
+
+fileToTest = reRequire('./fileToTest'); // fileToTest is now using your mock
+```
+
+Note that if your test file requires dependencies that in turn require the mock, those dependencies will still have the unmocked version. You must `reRequire` all files whose caches you want to be refreshed.
+
 ## Test
 
 ```

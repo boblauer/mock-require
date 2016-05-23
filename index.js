@@ -33,6 +33,12 @@ function stopMockingAll() {
   intercept = {};
 }
 
+function reRequire(path) {
+  var module = getFullPath(path, callerId.getData().filePath);
+  delete require.cache[require.resolve(module)];
+  return require(module);
+}
+
 function getFullPath(path, calledFrom) {
   var resolvedPath;
   try {
@@ -66,3 +72,4 @@ function isModuleNotFoundError(e){
 module.exports = startMocking;
 module.exports.stop = stopMocking;
 module.exports.stopAll = stopMockingAll;
+module.exports.reRequire = reRequire;
