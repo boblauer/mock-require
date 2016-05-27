@@ -121,7 +121,17 @@ mock('fs', {}); // fileToTest is still using the unmocked fs module
 fileToTest = reRequire('./fileToTest'); // fileToTest is now using your mock
 ```
 
-Note that if your file under test requires dependencies that in turn require the mock, those dependencies will still have the unmocked version. You must `reRequire` all modules whose caches you want to be refreshed.
+Note that if the file you are testing requires dependencies that in turn require the mock, those dependencies will still have the unmocked version. You may want to `reRequire` all of your dependencies to ensure that your mock is always being used.
+
+```javascript
+var fs = require('fs');
+var anotherDep = require('./anotherDep') // requires fs as a dependency
+var fileToTest = require('./fileToTest'); // requires fs and anotherDep as a dependency
+mock('fs', {}); // fileToTest and anotherDep are still using the unmocked fs module
+
+anotherDep = reRequire('./anotherDep'); // do this to make sure fs is being mocked consistently
+fileToTest = reRequire('./fileToTest');
+```
 
 ## Test
 
