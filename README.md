@@ -111,26 +111,26 @@ path1 === path2; // false
 
 __path__: `String`
 
-The file whose cache you want to refresh. This is useful if you're trying to mock a dependency for a file that has already been required in elsewhere (possibly in another test file). Normally, Node.js will cache this file, so any mocks that you make afterwards will have no effect. `reRequire` clears the cache and allows your mock to apply.
+The file whose cache you want to refresh. This is useful if you're trying to mock a dependency for a file that has already been required elsewhere (possibly in another test file). Normally, Node.js will cache this file, so any mocks that you apply afterwards will have no effect. `reRequire` clears the cache and allows your mock to work.
 
 ```javascript
 var fs = require('fs');
 var fileToTest = require('./fileToTest');
 mock('fs', {}); // fileToTest is still using the unmocked fs module
 
-fileToTest = reRequire('./fileToTest'); // fileToTest is now using your mock
+fileToTest = mock.reRequire('./fileToTest'); // fileToTest is now using your mock
 ```
 
 Note that if the file you are testing requires dependencies that in turn require the mock, those dependencies will still have the unmocked version. You may want to `reRequire` all of your dependencies to ensure that your mock is always being used.
 
 ```javascript
 var fs = require('fs');
-var anotherDep = require('./anotherDep') // requires fs as a dependency
-var fileToTest = require('./fileToTest'); // requires fs and anotherDep as a dependency
-mock('fs', {}); // fileToTest and anotherDep are still using the unmocked fs module
+var otherDep = require('./otherDep') // requires fs as a dependency
+var fileToTest = require('./fileToTest'); // requires fs and otherDep as a dependency
+mock('fs', {}); // fileToTest and otherDep are still using the unmocked fs module
 
-anotherDep = reRequire('./anotherDep'); // do this to make sure fs is being mocked consistently
-fileToTest = reRequire('./fileToTest');
+otherDep = mock.reRequire('./otherDep'); // do this to make sure fs is being mocked consistently
+fileToTest = mock.reRequire('./fileToTest');
 ```
 
 ## Test
