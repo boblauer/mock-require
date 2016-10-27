@@ -3,14 +3,22 @@ var Module           = require('module')
   , join             = require('path').join
   , callerId         = require('caller-id')
   , originalLoader   = Module._load
+  , interceptCache   = {}
   , intercept        = {}
   ;
 
 Module._load = function(request, parent) {
   var fullFilePath = getFullPath(request, parent.filename);
 
-  return intercept.hasOwnProperty(fullFilePath)
-    ? intercept[fullFilePath]
+  if (intercept.hasOwnProperty(fullFilePath)){
+    interceptCache[fullFilePath] = ((typeof intercept[fullFilePath] === 'string') ?
+        require(intercept[fullFilePath]) :
+        intercept[fullFilePath]);
+    delete intercept[fullFilePath];
+  }
+
+  return interceptCache.hasOwnProperty(fullFilePath)
+    ? interceptCache[fullFilePath]
     : originalLoader.apply(this, arguments);
 };
 
@@ -18,7 +26,7 @@ function startMocking(path, mockExport) {
   var calledFrom = callerId.getData().filePath;
 
   if (typeof mockExport === 'string') {
-    mockExport = require(getFullPath(mockExport, calledFrom));
+    mockExport = getFullPath(mockExport, calledFrom);
   }
 
   intercept[getFullPath(path, calledFrom)] = mockExport;
@@ -26,10 +34,13 @@ function startMocking(path, mockExport) {
 
 function stopMocking(path) {
   var calledFrom = callerId.getData().filePath;
-  delete intercept[getFullPath(path, calledFrom)];
+  var fullPath = getFullPath(path, calledFrom);
+  delete intercept[fullPath];
+  delete interceptCache[fullPath];
 }
 
 function stopMockingAll() {
+  interceptCache = {};
   intercept = {};
 }
 
