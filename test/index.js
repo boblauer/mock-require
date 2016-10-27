@@ -94,6 +94,17 @@ var assert  = require('assert')
   mock.stop('./throw-exception');
 })();
 
+(function shouldLoadMockedLibOnlyWhenRequired() {
+  mock('./throw-exception', './throw-exception-when-required');
+  try{
+    require('./throw-exception-runner')
+  }
+  catch (error) {
+    assert.equal(e.message, 'this should run when required')
+  }
+  mock.stopAll();
+})();
+
 (function shouldUnregisterAllMocks() {
   mock('fs', {});
   mock('path', {});
