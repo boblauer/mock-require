@@ -1,24 +1,25 @@
-var Module           = require('module')
-  , dirname          = require('path').dirname
-  , join             = require('path').join
-  , callerId         = require('caller-id')
-  , originalLoader   = Module._load
-  , interceptCache   = {}
-  , intercept        = {}
+var Module = require('module')
+  , dirname = require('path').dirname
+  , join = require('path').join
+  , callerId = require('caller-id')
+  , originalLoader = Module._load
+  , mockExports   = {}
+  , pendingMockExports = {}
   ;
 
 Module._load = function(request, parent) {
   var fullFilePath = getFullPath(request, parent.filename);
 
-  if (intercept.hasOwnProperty(fullFilePath)){
-    interceptCache[fullFilePath] = ((typeof intercept[fullFilePath] === 'string') ?
-        require(intercept[fullFilePath]) :
-        intercept[fullFilePath]);
-    delete intercept[fullFilePath];
+  if (pendingMockExports.hasOwnProperty(fullFilePath)){
+    mockExports[fullFilePath] = typeof pendingMockExports[fullFilePath] === 'string' ?
+        require(pendingMockExports[fullFilePath]) :
+        pendingMockExports[fullFilePath];
+
+    delete pendingMockExports[fullFilePath];
   }
 
-  return interceptCache.hasOwnProperty(fullFilePath)
-    ? interceptCache[fullFilePath]
+  return mockExports.hasOwnProperty(fullFilePath)
+    ? mockExports[fullFilePath]
     : originalLoader.apply(this, arguments);
 };
 
@@ -29,19 +30,19 @@ function startMocking(path, mockExport) {
     mockExport = getFullPath(mockExport, calledFrom);
   }
 
-  intercept[getFullPath(path, calledFrom)] = mockExport;
+  pendingMockExports[getFullPath(path, calledFrom)] = mockExport;
 }
 
 function stopMocking(path) {
   var calledFrom = callerId.getData().filePath;
   var fullPath = getFullPath(path, calledFrom);
-  delete intercept[fullPath];
-  delete interceptCache[fullPath];
+  delete pendingMockExports[fullPath];
+  delete mockExports[fullPath];
 }
 
 function stopMockingAll() {
-  interceptCache = {};
-  intercept = {};
+  mockExports = {};
+  pendingMockExports = {};
 }
 
 function reRequire(path) {
