@@ -57,13 +57,14 @@ function getFullPath(path, calledFrom) {
     resolvedPath = require.resolve(path);
   } catch(e) { }
 
-  var isExternal = /[/\\]node_modules[/\\]/.test(resolvedPath);
+  var isLocalModule = /^\.{1,2}[/\\]?/.test(path);
+  var isExternal = !isLocalModule && /[/\\]node_modules[/\\]/.test(resolvedPath);
   var isSystemModule = resolvedPath === path;
+
   if (isExternal || isSystemModule) {
     return resolvedPath;
   }
 
-  var isLocalModule = /^\.{1,2}[/\\]/.test(path);
   if (!isLocalModule) {
     return path;
   }
