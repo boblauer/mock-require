@@ -46,11 +46,18 @@ var assert  = require('assert')
   assert.equal(obj.mocked, false);
 })();
 
+(function shouldMockRootLib() {
+  mock('.', { mocked: true });
+  assert.equal(require('.').mocked, true);
+  mock.stop('.');
+})();
+
 (function shouldMockStandardLibs() {
   mock('fs', { mocked: true });
 
   var fs = require('fs');
   assert.equal(fs.mocked, true);
+  mock.stop('fs');
 })();
 
 (function shouldMockExternalLibs() {
@@ -70,6 +77,10 @@ var assert  = require('assert')
   mock('./exported-fn', './exported-obj');
   assert.equal(require('./exported-fn'), require('./exported-obj'));
   mock.stop('./exported-fn');
+})();
+
+(function shouldReRequireMockedRootLib() {
+  assert.equal(mock.reRequire('.'), 'root');
 })();
 
 (function mocksShouldCascade() {
