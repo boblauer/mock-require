@@ -1,6 +1,7 @@
 var Module = require('module')
   , dirname = require('path').dirname
   , join = require('path').join
+  , resolve = require('path').resolve
   , callerId = require('caller-id')
   , originalLoader = Module._load
   , mockExports   = {}
@@ -51,6 +52,36 @@ function reRequire(path) {
   return require(module);
 }
 
+function isFileContainedIn(dir, file, path) {
+    if (!file)
+        return false;
+
+    // `dir` might be relative, make it absolute
+    dir = resolve(process.cwd(), dir);
+
+    // Do not consider files in node_modules to be in NODE_PATH
+    if (/[/\\]node_modules[/\\]?/.test(dir))
+        return false;
+
+    const longPath = resolve(dir, path);
+
+    if (file.indexOf(longPath) !== 0)
+        return false;
+
+    try {
+        return file == require.resolve(longPath);
+    } catch (e) {
+        return false;
+    }
+}
+
+function isInNodePath(path, resolvedPath) {
+    // Check whether resolvedPath is in any of the NODE_PATH directories.
+    return Module.globalPaths.some(function(p) {
+        return isFileContainedIn(p, resolvedPath, path);
+    });
+}
+
 function getFullPath(path, calledFrom) {
   var resolvedPath;
   try {
@@ -58,10 +89,11 @@ function getFullPath(path, calledFrom) {
   } catch(e) { }
 
   var isLocalModule = /^\.{1,2}[/\\]?/.test(path);
+  var isInPath = isInNodePath(path, resolvedPath);
   var isExternal = !isLocalModule && /[/\\]node_modules[/\\]/.test(resolvedPath);
   var isSystemModule = resolvedPath === path;
 
-  if (isExternal || isSystemModule) {
+  if (isExternal || isSystemModule || isInPath) {
     return resolvedPath;
   }
 
