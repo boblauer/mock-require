@@ -52,33 +52,15 @@ function reRequire(path) {
   return require(module);
 }
 
-function isFileContainedIn(dir, file, path) {
-    if (!file)
-        return false;
-
-    // `dir` might be relative, make it absolute
-    dir = resolve(process.cwd(), dir);
-
-    // Do not consider files in node_modules to be in NODE_PATH
-    if (/[/\\]node_modules[/\\]?/.test(dir))
-        return false;
-
-    const longPath = resolve(dir, path);
-
-    if (file.indexOf(longPath) !== 0)
-        return false;
-
-    try {
-        return file == require.resolve(longPath);
-    } catch (e) {
-        return false;
-    }
-}
-
 function isInNodePath(path, resolvedPath) {
-    // Check whether resolvedPath is in any of the NODE_PATH directories.
-    return Module.globalPaths.some(function(p) {
-        return isFileContainedIn(p, resolvedPath, path);
+  if (!resolvedPath) return false;
+
+  return Module.globalPaths
+    .map(function(nodePath) {
+      return resolve(process.cwd(), nodePath);
+    })
+    .some(function(fullNodePath) {
+      return resolvedPath.indexOf(fullNodePath) === 0;
     });
 }
 
