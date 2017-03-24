@@ -11,7 +11,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "node test/runner"
+    "test": "NODE_PATH=test/node-path node test/runner"
   },
   "repository": {
     "type": "git",

@@ -208,4 +208,18 @@ var assert  = require('assert')
   mock.stopAll();
 })();
 
+(function shouldMockFilesInNodePathByFullPath() {
+  mock('in-node-path', {id: 'in-node-path'});
+
+  var b = require('in-node-path')
+  var c = require('./node-path/in-node-path');
+
+  assert.equal(b.id, 'in-node-path');
+  assert.equal(c.id, 'in-node-path');
+
+  assert.equal(b, c);
+
+  mock.stopAll();
+})();
+
 console.log('All tests pass!');
