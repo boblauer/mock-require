@@ -57,7 +57,7 @@ function isInNodePath(resolvedPath) {
 
   return Module.globalPaths
     .map(function(nodePath) {
-      return resolve(process.cwd(), nodePath);
+      return resolve(process.cwd(), nodePath) + '/';
     })
     .some(function(fullNodePath) {
       return resolvedPath.indexOf(fullNodePath) === 0;
