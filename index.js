@@ -52,7 +52,7 @@ function reRequire(path) {
   return require(module);
 }
 
-function isInNodePath(path, resolvedPath) {
+function isInNodePath(resolvedPath) {
   if (!resolvedPath) return false;
 
   return Module.globalPaths
@@ -71,7 +71,7 @@ function getFullPath(path, calledFrom) {
   } catch(e) { }
 
   var isLocalModule = /^\.{1,2}[/\\]?/.test(path);
-  var isInPath = isInNodePath(path, resolvedPath);
+  var isInPath = isInNodePath(resolvedPath);
   var isExternal = !isLocalModule && /[/\\]node_modules[/\\]/.test(resolvedPath);
   var isSystemModule = resolvedPath === path;
 
