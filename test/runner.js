@@ -1,5 +1,5 @@
 var assert  = require('assert')
-  , mock    = require('../index')
+  , mock    = require('..')
   ;
 
 (function shouldMockAndUnmock() {
