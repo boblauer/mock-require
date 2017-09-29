@@ -10,7 +10,10 @@
   "dependencies": {
     "caller-id": "^0.1.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node": "^8.0.31",
+    "typescript": "^2.5.3"
+  },
   "scripts": {
     "test": "tsc && NODE_PATH=test/node-path node test/runner"
   },
