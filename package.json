@@ -7,11 +7,16 @@
     "test": "test"
   },
   "dependencies": {
-    "caller-id": "^0.1.0"
+    "caller-id": "^0.1.0",
+    "get-caller-file": "^1.0.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^4.15.0",
+    "mocha": "^4.1.0"
+  },
   "scripts": {
-    "test": "NODE_PATH=test/node-path node test/runner"
+    "lint": "eslint .",
+    "test": "NODE_PATH=test/node-path mocha ./test/runner"
   },
   "repository": {
     "type": "git",

@@ -1,4 +1,6 @@
-var x = require('../x')
+'use strict';
+
+const x = require('../x');
 
 module.exports = {
   id: 'local-module-c',

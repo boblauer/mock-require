@@ -1,225 +1,200 @@
-var assert  = require('assert')
-  , mock    = require('../index')
-  ;
+'use strict';
 
-(function shouldMockAndUnmock() {
-  mock('./exported-fn', function() {
-    return 'mocked fn';
+const assert = require('assert');
+const mock = require('..');
+
+describe('Mock Require', () => {
+  afterEach(() => {
+    mock.stopAll();
   });
 
-  mock.stop('./exported-fn');
+  it('should mock a required function', () => {
+    mock('./exported-fn', () => {
+      return 'mocked fn';
+    });
 
-  var fn = require('./exported-fn');
-  assert.equal(fn(), 'exported function');
-})();
-
-(function shouldMockRequiredFn() {
-  mock('./exported-fn', function() {
-    return 'mocked fn';
+    assert.equal(require('./exported-fn')(), 'mocked fn');
   });
 
-  var fn = require('./exported-fn');
-  assert.equal(fn(), 'mocked fn');
+  it('should mock a required object', () => {
+    mock('./exported-obj', {
+      mocked: true,
+      fn: function() {
+        return 'mocked obj';
+      }
+    });
 
-  mock.stop('./exported-fn');
+    let obj = require('./exported-obj');
+    assert.equal(obj.fn(), 'mocked obj');
+    assert.equal(obj.mocked, true);
 
-  fn = require('./exported-fn');
-  assert.equal(fn(), 'exported function');
-})();
+    mock.stop('./exported-obj');
 
-(function shouldMockRequiredObj() {
-  mock('./exported-obj', {
-    mocked: true,
-    fn: function() {
-      return 'mocked obj';
+    obj = require('./exported-obj');
+    assert.equal(obj.fn(), 'exported object');
+    assert.equal(obj.mocked, false);
+  });
+
+  it('should unmock', () => {
+    mock('./exported-fn', () => {
+      return 'mocked fn';
+    });
+
+    mock.stop('./exported-fn');
+
+    const fn = require('./exported-fn');
+    assert.equal(fn(), 'exported function');
+  });
+
+  it('should mock a root file', () => {
+    mock('.', { mocked: true });
+    assert.equal(require('.').mocked, true);
+  });
+
+  it('should mock a standard lib', () => {
+    mock('fs', { mocked: true });
+
+    const fs = require('fs');
+    assert.equal(fs.mocked, true);
+  });
+
+  it('should mock an external lib', () => {
+    mock('mocha', { mocked: true });
+
+    const mocha = require('mocha');
+    assert.equal(mocha.mocked, true);
+  });
+
+  it('should one lib with another', () => {
+    mock('fs', 'path');
+    assert.equal(require('fs'), require('path'));
+
+    mock('./exported-fn', './exported-obj');
+    assert.equal(require('./exported-fn'), require('./exported-obj'));
+  });
+
+  it('should support re-requiring', () => {
+    assert.equal(mock.reRequire('.'), 'root');
+  });
+
+  it('should cascade mocks', () => {
+    mock('path', { mocked: true });
+    mock('fs', 'path');
+
+    const fs = require('fs');
+    assert.equal(fs.mocked, true);
+  });
+
+  it('should never require the real lib when mocking it', () => {
+    mock('./throw-exception', {});
+    require('./throw-exception');
+  });
+
+  it('should mock libs required elsewhere', () => {
+    mock('./throw-exception', {});
+    require('./throw-exception-runner');
+  });
+
+  it('should only load the mocked lib when it is required', () => {
+    mock('./throw-exception', './throw-exception-when-required');
+    try {
+      require('./throw-exception-runner');
+      throw new Error('this line should never be executed.');
+    } catch (error) {
+      assert.equal(error.message, 'this should run when required');
     }
   });
 
-  var obj = require('./exported-obj');
-  assert.equal(obj.fn(), 'mocked obj');
-  assert.equal(obj.mocked, true);
+  it('should stop all mocks', () => {
+    mock('fs', {});
+    mock('path', {});
+    const fsMock = require('fs');
+    const pathMock = require('path');
 
-  mock.stop('./exported-obj');
+    mock.stopAll();
 
-  obj = require('./exported-obj');
-  assert.equal(obj.fn(), 'exported object');
-  assert.equal(obj.mocked, false);
-})();
+    assert.notEqual(require('fs'), fsMock);
+    assert.notEqual(require('path'), pathMock);
+  });
 
-(function shouldMockRootLib() {
-  mock('.', { mocked: true });
-  assert.equal(require('.').mocked, true);
-  mock.stop('.');
-})();
+  it('should mock a module that does not exist', () => {
+    mock('a', { id: 'a' });
 
-(function shouldMockStandardLibs() {
-  mock('fs', { mocked: true });
+    assert.equal(require('a').id, 'a');
+  });
 
-  var fs = require('fs');
-  assert.equal(fs.mocked, true);
-  mock.stop('fs');
-})();
+  it('should mock multiple modules that do not exist', () => {
+    mock('a', { id: 'a' });
+    mock('b', { id: 'b' });
+    mock('c', { id: 'c' });
 
-(function shouldMockExternalLibs() {
-  mock('caller-id', { mocked: true });
+    assert.equal(require('a').id, 'a');
+    assert.equal(require('b').id, 'b');
+    assert.equal(require('c').id, 'c');
+  });
 
-  var callerId = require('caller-id');
-  assert.equal(callerId.mocked, true);
-  mock.stop('caller-id');
-})();
+  it('should mock a local file that does not exist', () => {
+    mock('./a', { id: 'a' });
+    assert.equal(require('./a').id, 'a');
 
-(function shouldRequireMockedLib() {
-  mock('fs', 'path');
+    mock('../a', { id: 'a' });
+    assert.equal(require('../a').id, 'a');
+  });
 
-  assert.equal(require('fs'), require('path'));
-  mock.stop('fs');
+  it('should mock a local file required elsewhere', () => {
+    mock('./x', { id: 'x' });
+    assert.equal(require('./nested/module-c').dependentOn.id, 'x');
+  });
 
-  mock('./exported-fn', './exported-obj');
-  assert.equal(require('./exported-fn'), require('./exported-obj'));
-  mock.stop('./exported-fn');
-})();
+  it('should mock multiple local files that do not exist', () => {
+    mock('./a', { id: 'a' });
+    mock('./b', { id: 'b' });
+    mock('./c', { id: 'c' });
 
-(function shouldReRequireMockedRootLib() {
-  assert.equal(mock.reRequire('.'), 'root');
-})();
+    assert.equal(require('./a').id, 'a');
+    assert.equal(require('./b').id, 'b');
+    assert.equal(require('./c').id, 'c');
+  });
 
-(function mocksShouldCascade() {
-  mock('path', { mocked: true });
-  mock('fs', 'path');
+  it('should unmock a module that is not found', () => {
+    const moduleName = 'module-that-is-not-installed';
 
-  var fs = require('fs');
-  assert.equal(fs.mocked, true);
-  mock.stop('fs');
-  mock.stop('path');
-})();
+    mock(moduleName, { mocked: true });
+    mock.stop(moduleName);
 
-(function mocksShouldNeverRequireTheOriginal() {
-  mock('./throw-exception', {});
-  require('./throw-exception');
-  mock.stop('./throw-exception');
-})();
+    try {
+      require(moduleName);
+      throw new Error('this line should never be executed.');
+    } catch (e) {
+      assert.equal(e.code, 'MODULE_NOT_FOUND');
+    }
+  });
 
-(function mocksShouldWorkWhenRequiredFromOtherFile() {
-  mock('./throw-exception', {});
-  require('./throw-exception-runner');
-  mock.stop('./throw-exception');
-})();
+  it('should differentiate between local files and external modules with the same name', () => {
+    mock('module-a', { id: 'external-module-a' });
 
-(function shouldLoadMockedLibOnlyWhenRequired() {
-  mock('./throw-exception', './throw-exception-when-required');
-  try{
-    require('./throw-exception-runner')
-  }
-  catch (error) {
-    assert.equal(e.message, 'this should run when required')
-  }
-  mock.stopAll();
-})();
+    const b = require('./module-b');
 
-(function shouldUnregisterAllMocks() {
-  mock('fs', {});
-  mock('path', {});
-  var fsMock = require('fs');
-  var pathMock = require('path');
+    assert.equal(b.dependentOn.id, 'local-module-a');
+    assert.equal(b.dependentOn.dependentOn.id, 'external-module-a');
+  });
 
-  mock.stopAll();
+  it('should mock files in the node path by the full path', () => {
+    assert.equal(process.env.NODE_PATH, 'test/node-path');
 
-  assert.notEqual(require('fs'), fsMock);
-  assert.notEqual(require('path'), pathMock);
-})();
+    mock('in-node-path', { id: 'in-node-path' });
 
-(function shouldRegisterMockForExternalModuleThatIsNotFound() {
-  mock('a', {id: 'a'});
+    const b = require('in-node-path');
+    const c = require('./node-path/in-node-path');
 
-  assert.equal(require('a').id, 'a');
+    assert.equal(b.id, 'in-node-path');
+    assert.equal(c.id, 'in-node-path');
 
-  mock.stopAll();
-})();
+    assert.equal(b, c);
+  });
 
-(function shouldRegisterMultipleMocksForExternalModulesThatAreNotFound() {
-  mock('a', {id: 'a'});
-  mock('b', {id: 'b'});
-  mock('c', {id: 'c'});
+// (function shouldMockFilesInNodePathByFullPath() {
 
-  assert.equal(require('a').id, 'a');
-  assert.equal(require('b').id, 'b');
-  assert.equal(require('c').id, 'c');
-
-  mock.stopAll();
-})();
-
-(function shouldRegisterMockForLocalModuleThatIsNotFound() {
-  mock('./a', {id: 'a'});
-
-  assert.equal(require('./a').id, 'a');
-
-  mock.stopAll();
-})();
-
-(function shouldRegisterMockForLocalModuleThatIsNotFound_2() {
-  mock('../a', {id: 'a'});
-
-  assert.equal(require('../a').id, 'a');
-
-  mock.stopAll();
-})();
-
-(function shouldRegisterMockForLocalModuleThatIsNotFoundAtCorrectPath() {
-  mock('./x', {id: 'x'});
-
-  assert.equal(require('./nested/module-c').dependentOn.id, 'x');
-
-  mock.stopAll();
-})();
-
-(function shouldRegisterMultipleMocksForLocalModulesThatAreNotFound() {
-  mock('./a', {id: 'a'});
-  mock('./b', {id: 'b'});
-  mock('./c', {id: 'c'});
-
-  assert.equal(require('./a').id, 'a');
-  assert.equal(require('./b').id, 'b');
-  assert.equal(require('./c').id, 'c');
-
-  mock.stopAll();
-})();
-
-(function shouldUnRegisterMockForModuleThatIsNotFound() {
-  var moduleName = 'module-that-is-not-installed';
-
-  mock(moduleName, {mocked: true});
-  mock.stop(moduleName);
-
-  try{
-    require(moduleName)
-  } catch (e) {
-    assert.equal(e.code, 'MODULE_NOT_FOUND')
-  }
-})();
-
-(function shouldLoadMockedExternalModuleWhenLocalModuleHasSameName() {
-  mock('module-a', {id: 'external-module-a'});
-
-  var b = require('./module-b')
-
-  assert.equal(b.dependentOn.id, 'local-module-a')
-  assert.equal(b.dependentOn.dependentOn.id, 'external-module-a')
-
-  mock.stopAll();
-})();
-
-(function shouldMockFilesInNodePathByFullPath() {
-  mock('in-node-path', {id: 'in-node-path'});
-
-  var b = require('in-node-path')
-  var c = require('./node-path/in-node-path');
-
-  assert.equal(b.id, 'in-node-path');
-  assert.equal(c.id, 'in-node-path');
-
-  assert.equal(b, c);
-
-  mock.stopAll();
-})();
-
-console.log('All tests pass!');
+//   mock.stopAll();
+// })();
+});

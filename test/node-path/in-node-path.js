@@ -1,3 +1,5 @@
+'use strict';
+
 {
-    id: 'node-path-set'
+  id: 'node-path-set';
 }
