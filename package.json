@@ -7,7 +7,6 @@
     "test": "test"
   },
   "dependencies": {
-    "caller-id": "^0.1.0",
     "get-caller-file": "^1.0.2"
   },
   "devDependencies": {
