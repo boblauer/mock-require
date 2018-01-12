@@ -1,6 +1,6 @@
 {
   "name": "mock-require",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Simple, intuitive mocking of Node.js modules.",
   "main": "index.js",
   "directories": {
