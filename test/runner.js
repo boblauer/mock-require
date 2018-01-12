@@ -192,9 +192,4 @@ describe('Mock Require', () => {
 
     assert.equal(b, c);
   });
-
-// (function shouldMockFilesInNodePathByFullPath() {
-
-//   mock.stopAll();
-// })();
 });
