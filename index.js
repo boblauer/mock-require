@@ -5,6 +5,7 @@ const dirname = require('path').dirname;
 const join = require('path').join;
 const resolve = require('path').resolve;
 const getCallerFile = require('get-caller-file');
+const normalize = require('normalize-path');
 const originalLoader = Module._load;
 
 let mockExports = {};
@@ -13,7 +14,7 @@ let pendingMockExports = {};
 Module._load = function(request, parent) {
   if (!parent) return originalLoader.apply(this, arguments);
 
-  const fullFilePath = getFullPath(request, parent.filename);
+  const fullFilePath = getFullPathNormalized(request, parent.filename);
 
   if (pendingMockExports.hasOwnProperty(fullFilePath)) {
     mockExports[fullFilePath] = typeof pendingMockExports[fullFilePath] === 'string' ?
@@ -32,15 +33,15 @@ function startMocking(path, mockExport) {
   const calledFrom = getCallerFile();
 
   if (typeof mockExport === 'string') {
-    mockExport = getFullPath(mockExport, calledFrom);
+    mockExport = getFullPathNormalized(mockExport, calledFrom);
   }
 
-  pendingMockExports[getFullPath(path, calledFrom)] = mockExport;
+  pendingMockExports[getFullPathNormalized(path, calledFrom)] = mockExport;
 }
 
 function stopMocking(path) {
   const calledFrom = getCallerFile();
-  const fullPath = getFullPath(path, calledFrom);
+  const fullPath = getFullPathNormalized(path, calledFrom);
   delete pendingMockExports[fullPath];
   delete mockExports[fullPath];
 }
@@ -51,7 +52,7 @@ function stopMockingAll() {
 }
 
 function reRequire(path) {
-  const module = getFullPath(path, getCallerFile());
+  const module = getFullPathNormalized(path, getCallerFile());
   delete require.cache[require.resolve(module)];
   return require(module);
 }
@@ -95,6 +96,10 @@ function getFullPath(path, calledFrom) {
   } catch (e) {
     if (isModuleNotFoundError(e)) { return localModuleName; } else { throw e; }
   }
+}
+
+function getFullPathNormalized(path, calledFrom) {
+  return normalize(getFullPath(path, calledFrom));
 }
 
 function isModuleNotFoundError(e) {

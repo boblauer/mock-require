@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('assert');
+const normalize = require('normalize-path');
 const mock = require('..');
 
 describe('Mock Require', () => {
@@ -180,7 +181,7 @@ describe('Mock Require', () => {
   });
 
   it('should mock files in the node path by the full path', () => {
-    assert.equal(process.env.NODE_PATH, 'test/node-path');
+    assert.equal(normalize(process.env.NODE_PATH), 'test/node-path');
 
     mock('in-node-path', { id: 'in-node-path' });
 
