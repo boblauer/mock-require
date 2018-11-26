@@ -72,7 +72,7 @@ function isInNodePath(resolvedPath) {
 function getFullPath(path, calledFrom) {
   let resolvedPath;
   try {
-    resolvedPath = require.resolve(path);
+    resolvedPath = require.resolve(path, { paths: [ calledFrom ]});
   } catch (e) {
     // do nothing
   }
