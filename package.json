@@ -16,7 +16,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "NODE_PATH=test/node-path mocha ./test/runner"
+    "test": "cp index.js test/node-path/index.js && NODE_PATH=test/node-path mocha ./test/runner && rm test/node-path/index.js"
   },
   "repository": {
     "type": "git",

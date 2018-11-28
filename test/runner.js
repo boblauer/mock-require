@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 const normalize = require('normalize-path');
-const mock = require('..');
+const mock = require('./node-path/index');
 
 describe('Mock Require', () => {
   afterEach(() => {
@@ -77,6 +77,10 @@ describe('Mock Require', () => {
   it('should support re-requiring', () => {
     assert.equal(mock.reRequire('.'), 'root');
   });
+
+  it('should support re-requiring names with collisions', () => {
+    assert.equal(mock.reRequire('./index'), 'root')
+  })
 
   it('should cascade mocks', () => {
     mock('path', { mocked: true });
