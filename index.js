@@ -72,7 +72,7 @@ function isInNodePath(resolvedPath) {
 function getFullPath(path, calledFrom) {
   let resolvedPath;
   try {
-    resolvedPath = require.resolve(path, { paths: [ calledFrom ]});
+    resolvedPath = Module._resolveFilename(path, Module._cache[calledFrom]);
   } catch (e) {
     // do nothing
   }
