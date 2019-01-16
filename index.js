@@ -4,6 +4,7 @@ const Module = require('module');
 const dirname = require('path').dirname;
 const join = require('path').join;
 const resolve = require('path').resolve;
+const pathsep = require('path').sep;
 const getCallerFile = require('get-caller-file');
 const normalize = require('normalize-path');
 const originalLoader = Module._load;
@@ -62,7 +63,7 @@ function isInNodePath(resolvedPath) {
 
   return Module.globalPaths
     .map((nodePath) => {
-      return resolve(process.cwd(), nodePath) + '/';
+      return resolve(process.cwd(), nodePath) + pathsep;
     })
     .some((fullNodePath) => {
       return resolvedPath.indexOf(fullNodePath) === 0;
