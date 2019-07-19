@@ -27,7 +27,7 @@ http.request(); // 'http.request called'
 
 __path__: `String`
 
-The module you that you want to mock.  This is the same string you would pass in if you wanted to `require` the module.
+The module that you want to mock.  This is the same string you would pass in if you wanted to `require` the module.
 
 This path should be relative to the current file, just as it would be if you were to `require` the module from the current file.  mock-require is smart enough to mock this module everywhere it is required, even if it's required from a different file using a different relative path.
 
