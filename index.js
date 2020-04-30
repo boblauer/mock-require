@@ -18,10 +18,13 @@ Module._load = function (request, parent) {
   var fullFilePath = getFullPathNormalized(request, parent.filename);
 
   if (pendingMockExports.hasOwnProperty(fullFilePath)) {
+    var pending = pendingMockExports[fullFilePath];
+    var mockExport = pending.lazy ? pending.mockExport() : pending.mockExport;
+
     mockExports[fullFilePath] =
-      typeof pendingMockExports[fullFilePath] === 'string'
-        ? require(pendingMockExports[fullFilePath])
-        : pendingMockExports[fullFilePath];
+      typeof mockExport === 'string'
+        ? require(getFullPathNormalized(mockExport, pending.calledFrom))
+        : mockExport;
 
     delete pendingMockExports[fullFilePath];
   }
@@ -31,14 +34,14 @@ Module._load = function (request, parent) {
     : originalLoader.apply(this, arguments);
 };
 
-function startMocking(path, mockExport) {
+function startMocking(path, mockExport, lazy) {
   var calledFrom = getCallerFile();
 
-  if (typeof mockExport === 'string') {
-    mockExport = getFullPathNormalized(mockExport, calledFrom);
-  }
-
-  pendingMockExports[getFullPathNormalized(path, calledFrom)] = mockExport;
+  pendingMockExports[getFullPathNormalized(path, calledFrom)] = {
+    mockExport: mockExport,
+    calledFrom: calledFrom,
+    lazy: lazy,
+  };
 }
 
 function stopMocking(path) {
