@@ -1,26 +1,27 @@
 'use strict';
 
-const Module = require('module');
-const dirname = require('path').dirname;
-const join = require('path').join;
-const resolve = require('path').resolve;
-const pathsep = require('path').sep;
-const getCallerFile = require('get-caller-file');
-const normalize = require('normalize-path');
-const originalLoader = Module._load;
+var Module = require('module');
+var dirname = require('path').dirname;
+var join = require('path').join;
+var resolve = require('path').resolve;
+var pathsep = require('path').sep;
+var getCallerFile = require('get-caller-file');
+var normalize = require('normalize-path');
+var originalLoader = Module._load;
 
-let mockExports = {};
-let pendingMockExports = {};
+var mockExports = {};
+var pendingMockExports = {};
 
-Module._load = function(request, parent) {
+Module._load = function (request, parent) {
   if (!parent) return originalLoader.apply(this, arguments);
 
-  const fullFilePath = getFullPathNormalized(request, parent.filename);
+  var fullFilePath = getFullPathNormalized(request, parent.filename);
 
   if (pendingMockExports.hasOwnProperty(fullFilePath)) {
-    mockExports[fullFilePath] = typeof pendingMockExports[fullFilePath] === 'string' ?
-      require(pendingMockExports[fullFilePath]) :
-      pendingMockExports[fullFilePath];
+    mockExports[fullFilePath] =
+      typeof pendingMockExports[fullFilePath] === 'string'
+        ? require(pendingMockExports[fullFilePath])
+        : pendingMockExports[fullFilePath];
 
     delete pendingMockExports[fullFilePath];
   }
@@ -31,7 +32,7 @@ Module._load = function(request, parent) {
 };
 
 function startMocking(path, mockExport) {
-  const calledFrom = getCallerFile();
+  var calledFrom = getCallerFile();
 
   if (typeof mockExport === 'string') {
     mockExport = getFullPathNormalized(mockExport, calledFrom);
@@ -41,8 +42,8 @@ function startMocking(path, mockExport) {
 }
 
 function stopMocking(path) {
-  const calledFrom = getCallerFile();
-  const fullPath = getFullPathNormalized(path, calledFrom);
+  var calledFrom = getCallerFile();
+  var fullPath = getFullPathNormalized(path, calledFrom);
   delete pendingMockExports[fullPath];
   delete mockExports[fullPath];
 }
@@ -53,7 +54,7 @@ function stopMockingAll() {
 }
 
 function reRequire(path) {
-  const module = getFullPathNormalized(path, getCallerFile());
+  var module = getFullPathNormalized(path, getCallerFile());
   delete require.cache[require.resolve(module)];
   return require(module);
 }
@@ -62,26 +63,27 @@ function isInNodePath(resolvedPath) {
   if (!resolvedPath) return false;
 
   return Module.globalPaths
-    .map((nodePath) => {
+    .map(function (nodePath) {
       return resolve(process.cwd(), nodePath) + pathsep;
     })
-    .some((fullNodePath) => {
+    .some(function (fullNodePath) {
       return resolvedPath.indexOf(fullNodePath) === 0;
     });
 }
 
 function getFullPath(path, calledFrom) {
-  let resolvedPath;
+  var resolvedPath;
   try {
     resolvedPath = require.resolve(path);
   } catch (e) {
     // do nothing
   }
 
-  const isLocalModule = /^\.{1,2}[/\\]?/.test(path);
-  const isInPath = isInNodePath(resolvedPath);
-  const isExternal = !isLocalModule && /[/\\]node_modules[/\\]/.test(resolvedPath);
-  const isSystemModule = resolvedPath === path;
+  var isLocalModule = /^\.{1,2}[/\\]?/.test(path);
+  var isInPath = isInNodePath(resolvedPath);
+  var isExternal =
+    !isLocalModule && /[/\\]node_modules[/\\]/.test(resolvedPath);
+  var isSystemModule = resolvedPath === path;
 
   if (isExternal || isSystemModule || isInPath) {
     return resolvedPath;
@@ -91,11 +93,15 @@ function getFullPath(path, calledFrom) {
     return path;
   }
 
-  const localModuleName = join(dirname(calledFrom), path);
+  var localModuleName = join(dirname(calledFrom), path);
   try {
     return Module._resolveFilename(localModuleName);
   } catch (e) {
-    if (isModuleNotFoundError(e)) { return localModuleName; } else { throw e; }
+    if (isModuleNotFoundError(e)) {
+      return localModuleName;
+    } else {
+      throw e;
+    }
   }
 }
 

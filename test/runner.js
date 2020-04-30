@@ -1,31 +1,31 @@
 'use strict';
 
-const assert = require('assert');
-const normalize = require('normalize-path');
-const mock = require('..');
+var assert = require('assert');
+var normalize = require('normalize-path');
+var mock = require('..');
 
-describe('Mock Require', () => {
-  afterEach(() => {
+describe('Mock Require', function () {
+  afterEach(function () {
     mock.stopAll();
   });
 
-  it('should mock a required function', () => {
-    mock('./exported-fn', () => {
+  it('should mock a required function', function () {
+    mock('./exported-fn', function () {
       return 'mocked fn';
     });
 
     assert.equal(require('./exported-fn')(), 'mocked fn');
   });
 
-  it('should mock a required object', () => {
+  it('should mock a required object', function () {
     mock('./exported-obj', {
       mocked: true,
-      fn: function() {
+      fn: function () {
         return 'mocked obj';
-      }
+      },
     });
 
-    let obj = require('./exported-obj');
+    var obj = require('./exported-obj');
     assert.equal(obj.fn(), 'mocked obj');
     assert.equal(obj.mocked, true);
 
@@ -36,37 +36,37 @@ describe('Mock Require', () => {
     assert.equal(obj.mocked, false);
   });
 
-  it('should unmock', () => {
-    mock('./exported-fn', () => {
+  it('should unmock', function () {
+    mock('./exported-fn', function () {
       return 'mocked fn';
     });
 
     mock.stop('./exported-fn');
 
-    const fn = require('./exported-fn');
+    var fn = require('./exported-fn');
     assert.equal(fn(), 'exported function');
   });
 
-  it('should mock a root file', () => {
+  it('should mock a root file', function () {
     mock('.', { mocked: true });
     assert.equal(require('.').mocked, true);
   });
 
-  it('should mock a standard lib', () => {
+  it('should mock a standard lib', function () {
     mock('fs', { mocked: true });
 
-    const fs = require('fs');
+    var fs = require('fs');
     assert.equal(fs.mocked, true);
   });
 
-  it('should mock an external lib', () => {
+  it('should mock an external lib', function () {
     mock('mocha', { mocked: true });
 
-    const mocha = require('mocha');
+    var mocha = require('mocha');
     assert.equal(mocha.mocked, true);
   });
 
-  it('should one lib with another', () => {
+  it('should one lib with another', function () {
     mock('fs', 'path');
     assert.equal(require('fs'), require('path'));
 
@@ -74,29 +74,29 @@ describe('Mock Require', () => {
     assert.equal(require('./exported-fn'), require('./exported-obj'));
   });
 
-  it('should support re-requiring', () => {
+  it('should support re-requiring', function () {
     assert.equal(mock.reRequire('.'), 'root');
   });
 
-  it('should cascade mocks', () => {
+  it('should cascade mocks', function () {
     mock('path', { mocked: true });
     mock('fs', 'path');
 
-    const fs = require('fs');
+    var fs = require('fs');
     assert.equal(fs.mocked, true);
   });
 
-  it('should never require the real lib when mocking it', () => {
+  it('should never require the real lib when mocking it', function () {
     mock('./throw-exception', {});
     require('./throw-exception');
   });
 
-  it('should mock libs required elsewhere', () => {
+  it('should mock libs required elsewhere', function () {
     mock('./throw-exception', {});
     require('./throw-exception-runner');
   });
 
-  it('should only load the mocked lib when it is required', () => {
+  it('should only load the mocked lib when it is required', function () {
     mock('./throw-exception', './throw-exception-when-required');
     try {
       require('./throw-exception-runner');
@@ -106,11 +106,11 @@ describe('Mock Require', () => {
     }
   });
 
-  it('should stop all mocks', () => {
+  it('should stop all mocks', function () {
     mock('fs', {});
     mock('path', {});
-    const fsMock = require('fs');
-    const pathMock = require('path');
+    var fsMock = require('fs');
+    var pathMock = require('path');
 
     mock.stopAll();
 
@@ -118,13 +118,13 @@ describe('Mock Require', () => {
     assert.notEqual(require('path'), pathMock);
   });
 
-  it('should mock a module that does not exist', () => {
+  it('should mock a module that does not exist', function () {
     mock('a', { id: 'a' });
 
     assert.equal(require('a').id, 'a');
   });
 
-  it('should mock multiple modules that do not exist', () => {
+  it('should mock multiple modules that do not exist', function () {
     mock('a', { id: 'a' });
     mock('b', { id: 'b' });
     mock('c', { id: 'c' });
@@ -134,7 +134,7 @@ describe('Mock Require', () => {
     assert.equal(require('c').id, 'c');
   });
 
-  it('should mock a local file that does not exist', () => {
+  it('should mock a local file that does not exist', function () {
     mock('./a', { id: 'a' });
     assert.equal(require('./a').id, 'a');
 
@@ -142,12 +142,12 @@ describe('Mock Require', () => {
     assert.equal(require('../a').id, 'a');
   });
 
-  it('should mock a local file required elsewhere', () => {
+  it('should mock a local file required elsewhere', function () {
     mock('./x', { id: 'x' });
     assert.equal(require('./nested/module-c').dependentOn.id, 'x');
   });
 
-  it('should mock multiple local files that do not exist', () => {
+  it('should mock multiple local files that do not exist', function () {
     mock('./a', { id: 'a' });
     mock('./b', { id: 'b' });
     mock('./c', { id: 'c' });
@@ -157,8 +157,8 @@ describe('Mock Require', () => {
     assert.equal(require('./c').id, 'c');
   });
 
-  it('should unmock a module that is not found', () => {
-    const moduleName = 'module-that-is-not-installed';
+  it('should unmock a module that is not found', function () {
+    var moduleName = 'module-that-is-not-installed';
 
     mock(moduleName, { mocked: true });
     mock.stop(moduleName);
@@ -171,22 +171,22 @@ describe('Mock Require', () => {
     }
   });
 
-  it('should differentiate between local files and external modules with the same name', () => {
+  it('should differentiate between local files and external modules with the same name', function () {
     mock('module-a', { id: 'external-module-a' });
 
-    const b = require('./module-b');
+    var b = require('./module-b');
 
     assert.equal(b.dependentOn.id, 'local-module-a');
     assert.equal(b.dependentOn.dependentOn.id, 'external-module-a');
   });
 
-  it('should mock files in the node path by the full path', () => {
+  it('should mock files in the node path by the full path', function () {
     assert.equal(normalize(process.env.NODE_PATH), 'test/node-path');
 
     mock('in-node-path', { id: 'in-node-path' });
 
-    const b = require('in-node-path');
-    const c = require('./node-path/in-node-path');
+    var b = require('in-node-path');
+    var c = require('./node-path/in-node-path');
 
     assert.equal(b.id, 'in-node-path');
     assert.equal(c.id, 'in-node-path');
