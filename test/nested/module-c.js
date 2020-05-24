@@ -1,8 +1,8 @@
 'use strict';
 
-const x = require('../x');
+var x = require('../x');
 
 module.exports = {
   id: 'local-module-c',
-  dependentOn: x
+  dependentOn: x,
 };

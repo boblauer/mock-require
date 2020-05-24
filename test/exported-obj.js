@@ -2,7 +2,7 @@
 
 module.exports = {
   mocked: false,
-  fn() {
+  fn: function fn() {
     return 'exported object';
-  }
+  },
 };
