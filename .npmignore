@@ -1,0 +1,5 @@
+.vscode/
+test/
+.eslintignore
+.eslintrcrc
+.travis.yml

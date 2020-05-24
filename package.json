@@ -1,7 +1,7 @@
 {
-  "name": "mock-require",
-  "version": "3.0.3",
-  "description": "Simple, intuitive mocking of Node.js modules.",
+  "name": "mock-require-lazy",
+  "version": "0.1.0",
+  "description": "Simple, intuitive mocking of Node.js modules. Fork of mock-require adding lazy require and is a drop in replacement for mock-require",
   "main": "index.js",
   "directories": {
     "test": "test"
@@ -12,20 +12,18 @@
   },
   "devDependencies": {
     "cross-env": "^2.0.1",
-    "eslint": "^6.8.0",
+    "eslint": "^7.1.0",
     "eslint-plugin-es5": "^1.5.0",
-    "mocha": "^7.1.2",
-    "mocha-compat": "^3.5.5",
-    "nvs": "^0.2.0"
+    "mocha-compat": "^3.5.5"
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "cross-env NODE_PATH=test/node-path mocha ./test/runner",
-    "compat": "nvs 0.8,0.10,0.12,4,6,8,10,12,14 cross-env NODE_PATH=test/node-path mocha-compat ./test/runner"
+    "format": "eslint . --fix",
+    "test": "cross-env NODE_PATH=test/node-path mocha-compat ./test/runner"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/boblauer/mock-require.git"
+    "url": "https://github.com/kmalakoff/mock-require-lazy.git"
   },
   "keywords": [
     "require",
@@ -36,15 +34,17 @@
     "swap",
     "test",
     "mock",
-    "stub"
+    "stub",
+    "mock-require",
+    "lazy"
   ],
-  "author": "Bob Lauer <rlauer@gmail.com>",
+  "author": "Kevin Malakoff <kmalakoff@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/boblauer/mock-require/issues"
+    "url": "https://github.com/kmalakoff/mock-require-lazy/issues"
   },
-  "homepage": "https://github.com/boblauer/mock-require",
+  "homepage": "https://github.com/kmalakoff/mock-require-lazy",
   "engines": {
-    "node": ">=4.3.0"
+    "node": ">=0.8"
   }
 }
