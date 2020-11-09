@@ -41,6 +41,6 @@
   },
   "homepage": "https://github.com/boblauer/mock-require",
   "engines": {
-    "node": ">=4.3.0"
+    "node": ">=10"
   }
 }
