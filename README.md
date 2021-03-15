@@ -1,3 +1,7 @@
+# ⚠️ Deprecated
+
+This library has been deprecated. A better alternative can found at https://www.npmjs.com/package/proxyquire.
+
 # mock-require
 
 #### Simple, intuitive mocking of Node.js modules.
