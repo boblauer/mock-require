@@ -12,6 +12,8 @@ This library has been deprecated. A better alternative can found at https://www.
 
 mock-require is useful if you want to mock `require` statements in Node.js.  I wrote it because I wanted something with a straight-forward API that would let me mock anything, from a single exported function to a standard library.
 
+Call `mock` before you `require` the corresponding module.
+
 ## Usage
 
 ```javascript
